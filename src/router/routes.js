@@ -24,6 +24,11 @@ const routes = [
         path: "/usuarios",
         component: () => import("pages/UsuariosPage.vue"),
       },
+      {
+        path: "/agregar-trabajador",
+        name: "AgregarTrabajador",
+        component: () => import("components/AgregarTrabajadoresForm.vue"),
+      },
     ],
   },
 

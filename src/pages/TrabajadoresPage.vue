@@ -9,7 +9,7 @@
           color="primary"
           icon="add"
           label="Agregar Trabajador"
-          @click="addWorker"
+          @click="agregarTrabajador"
         />
       </q-toolbar>
 
@@ -32,96 +32,87 @@
 </template>
 
 <script>
+import { useQuasar } from "quasar";
+import axios from "axios";
+import SimpleDialog from "components/SimpleDialog.vue";
+
 export default {
   data() {
     return {
       columns: [
         {
-          name: "codigoModular",
-          required: true,
-          label: "Código Modular",
-          align: "left",
-          field: (row) => row.codigoModular,
-        },
-        {
           name: "secuencia",
-          required: true,
           label: "Secuencia",
           align: "left",
-          field: (row) => row.secuencia,
-        },
-        { name: "paterno", label: "Paterno", align: "left", field: "paterno" },
-        { name: "materno", label: "Materno", align: "left", field: "materno" },
-        { name: "nombres", label: "Nombres", align: "left", field: "nombres" },
-        {
-          name: "planilla",
-          label: "Planilla",
-          align: "left",
-          field: "planilla",
+          field: "secuencia",
         },
         {
-          name: "totalHaberes",
-          label: "Total Haberes",
+          name: "situacion",
+          label: "Situación",
           align: "left",
-          field: "totalHaberes",
+          field: "situacion",
         },
         {
-          name: "totalDescuentos",
-          label: "Total Descuentos",
+          name: "apellidos y nombres",
+          label: "Apellidos y nombres",
           align: "left",
-          field: "totalDescuentos",
+          field: (row) =>
+            `${row.persona.paterno} ${row.persona.materno} ${row.persona.nombres}`,
         },
         {
-          name: "liquidoPagar",
-          label: "Líquido a Pagar",
+          name: "cargo",
+          label: "Cargo",
           align: "left",
-          field: "liquidoPagar",
+          field: (row) => row.cargo.nombre_cargo,
         },
         { name: "actions", label: "Acciones", align: "left", field: "actions" },
       ],
-      tableData: [
-        {
-          id: 1,
-          codigoModular: "CM001",
-          secuencia: "S001",
-          paterno: "Pérez",
-          materno: "Díaz",
-          nombres: "Juan Carlos",
-          planilla: "P1",
-          totalHaberes: 2000,
-          totalDescuentos: 200,
-          liquidoPagar: 1800,
-        },
-        // A partir de aquí, datos ficticios
-        ...Array.from({ length: 30 }).map((_, index) => ({
-          id: index + 2,
-          codigoModular: `CM${String(index + 2).padStart(3, "0")}`,
-          secuencia: `S${String(index + 2).padStart(3, "0")}`,
-          paterno: `ApellidoP${index + 2}`,
-          materno: `ApellidoM${index + 2}`,
-          nombres: `Nombre${index + 2}`,
-          planilla: `P${(index % 5) + 1}`,
-          totalHaberes: 1500 + index * 10,
-          totalDescuentos: 100 + index * 5,
-          liquidoPagar: 1400 + index * 10 - (100 + index * 5),
-        })),
-      ],
-
-      pagination: {
-        rowsPerPage: 5,
-      },
+      tableData: [],
+      pagination: { rowsPerPage: 5 },
     };
   },
+  setup() {
+    const $q = useQuasar();
+
+    $q.dialog({
+      component: SimpleDialog,
+
+      // props forwarded to your custom component
+      componentProps: {
+        text: "something",
+        // ...more..props...
+      },
+    })
+      .onOk(() => {
+        console.log("OK");
+      })
+      .onCancel(() => {
+        console.log("Cancel");
+      })
+      .onDismiss(() => {
+        console.log("Called on OK or Cancel");
+      });
+  },
+
+  components: {},
+
+  created() {
+    this.fetchWorkers();
+  },
   methods: {
-    editWorker(worker) {
-      // Aquí puedes poner el código para editar el trabajador
-      // Por ejemplo, redireccionar a una página de edición o abrir un diálogo/modal
-      console.log("Editar trabajador:", worker);
+    async fetchWorkers() {
+      try {
+        const response = await axios.get(
+          "http://127.0.0.1:8000/trabajadores/empleado/"
+        );
+        console.log("Respuesta de la API:", response.data); // Depuración
+        this.tableData = response.data;
+      } catch (error) {
+        console.error("Hubo un error al obtener los datos:", error);
+      }
     },
-    addWorker() {
-      // Aquí puedes poner el código para agregar un nuevo trabajador
-      // Por ejemplo, redireccionar a una página de creación o abrir un diálogo/modal para agregar un trabajador
-      console.log("Agregar nuevo trabajador");
+    agregarTrabajador() {
+      this.$router.push({ name: "AgregarTrabajador" });
     },
   },
 };
